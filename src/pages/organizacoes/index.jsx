@@ -63,7 +63,7 @@ export default function Organizacoes() {
 
     try {
       // TODO: Quando o backend estiver pronto, descomentar o fetch
-      // const response = await fetch("http://localhost:8080/entidades", {
+      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/entidades`, {
       //   method: "POST",
       //   headers: { "Content-Type": "application/json" },
       //   body: JSON.stringify(formData)

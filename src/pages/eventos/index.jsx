@@ -24,7 +24,7 @@ export default function Eventos() {
     try {
       setLoading(true);
       // TODO: Quando o backend estiver pronto, descomentar o fetch
-      // const response = await fetch("http://localhost:8080/reunioes");
+      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes`);
       // if (!response.ok) {
       //   throw new Error("Erro ao carregar eventos");
       // }
@@ -137,7 +137,7 @@ export default function Eventos() {
       if (editingEvento) {
         // Editar evento
         // TODO: Quando o backend estiver pronto, descomentar o fetch
-        // const response = await fetch(`http://localhost:8080/reunioes/${editingEvento.id}`, {
+        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/${editingEvento.id}`, {
         //   method: "PUT",
         //   headers: { "Content-Type": "application/json" },
         //   body: JSON.stringify({
@@ -159,7 +159,7 @@ export default function Eventos() {
       } else {
         // Criar evento
         // TODO: Quando o backend estiver pronto, descomentar o fetch
-        // const response = await fetch("http://localhost:8080/reunioes", {
+        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes`, {
         //   method: "POST",
         //   headers: { "Content-Type": "application/json" },
         //   body: JSON.stringify({
@@ -198,7 +198,7 @@ export default function Eventos() {
 
     try {
       // TODO: Quando o backend estiver pronto, descomentar o fetch
-      // const response = await fetch(`http://localhost:8080/reunioes/${evento.id}`, {
+      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/${evento.id}`, {
       //   method: "DELETE"
       // });
       // if (!response.ok) throw new Error("Erro ao excluir evento");
