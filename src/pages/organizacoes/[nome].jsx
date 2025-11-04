@@ -200,8 +200,8 @@ export default function DetalhesOrganizacao() {
       const nomeDecodificado = decodeURIComponent(nome);
       // TODO: Quando o backend estiver pronto, descomentar o fetch
       // Promise.all([
-      //   fetch(`http://localhost:8080/entidades/${encodeURIComponent(nomeDecodificado)}`).then(res => res.json()),
-      //   fetch(`http://localhost:8080/reunioes/entidade/${encodeURIComponent(nomeDecodificado)}`).then(res => res.json())
+      //   fetch(`${process.env.NEXT_PUBLIC_API_URL}/entidades/${encodeURIComponent(nomeDecodificado)}`).then(res => res.json()),
+      //   fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/entidade/${encodeURIComponent(nomeDecodificado)}`).then(res => res.json())
       // ])
       //   .then(([orgData, reunioesData]) => {
       //     setOrganizacao({
@@ -283,7 +283,7 @@ export default function DetalhesOrganizacao() {
       if (editingAluno) {
         // Editar aluno
         const response = await fetch(
-          `http://localhost:8080/alunos/${editingAluno.cpf}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/alunos/${editingAluno.cpf}`,
           {
             method: "PUT",
             headers: { 
@@ -322,7 +322,7 @@ export default function DetalhesOrganizacao() {
         // Adicionar aluno
         // TODO: Quando o backend estiver pronto, descomentar o fetch
         // const response = await fetch(
-        //   `http://localhost:8080/entidades/${encodeURIComponent(organizacao.nome)}/adicionar-aluno`,
+        //   `${process.env.NEXT_PUBLIC_API_URL}/entidades/${encodeURIComponent(organizacao.nome)}/adicionar-aluno`,
         //   {
         //     method: "POST",
         //     headers: { 
@@ -371,7 +371,7 @@ export default function DetalhesOrganizacao() {
     try {
       // TODO: Quando o backend estiver pronto, descomentar o fetch
       // const response = await fetch(
-      //   `http://localhost:8080/entidades/${encodeURIComponent(organizacao.nome)}/remover-aluno`,
+      //   `${process.env.NEXT_PUBLIC_API_URL}/entidades/${encodeURIComponent(organizacao.nome)}/remover-aluno`,
       //   {
       //     method: "POST",
       //     headers: { "Content-Type": "application/json" },
@@ -447,7 +447,7 @@ export default function DetalhesOrganizacao() {
     try {
       if (editingReuniao) {
         // Editar reunião
-        const response = await fetch(`http://localhost:8080/reunioes/${editingReuniao.id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/${editingReuniao.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -477,7 +477,7 @@ export default function DetalhesOrganizacao() {
         alert("Reunião editada com sucesso!");
       } else {
         // Criar reunião
-        const response = await fetch("http://localhost:8080/reunioes", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -520,7 +520,7 @@ export default function DetalhesOrganizacao() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/reunioes/${reuniao.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/${reuniao.id}`, {
         method: "DELETE"
       });
       if (!response.ok) throw new Error("Erro ao excluir reunião");
