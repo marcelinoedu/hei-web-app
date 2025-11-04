@@ -142,9 +142,6 @@ export default function Organizacoes() {
             <Link href="/organizacoes" className="text-[#b53b18] font-medium">
               Organizações
             </Link>
-            <Link href="/eventos" className="text-[#3a2418] hover:text-[#b53b18] transition-colors font-medium">
-              Eventos
-            </Link>
           </nav>
         </div>
       </header>

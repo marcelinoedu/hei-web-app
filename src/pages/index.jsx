@@ -58,9 +58,6 @@ export default function Home() {
             <Link href="/organizacoes" className="text-[#3a2418] hover:text-[#b53b18] transition-colors font-medium">
               Organizações
             </Link>
-            <Link href="/eventos" className="text-[#3a2418] hover:text-[#b53b18] transition-colors font-medium">
-              Eventos
-            </Link>
           </nav>
         </div>
       </header>
@@ -87,24 +84,6 @@ export default function Home() {
                 <span>Explorar Organizações</span>
 
               </DecoButton>
-            </Link>
-            
-            <Link href="/eventos">
-              <button className="
-                w-full sm:w-auto
-                px-8 py-4
-                font-display text-lg tracking-wide
-                text-[#b53b18]
-                bg-transparent
-                border-2 border-[#b53b18]
-                rounded-xl
-                transition-all duration-300 ease-out
-                hover:bg-[#b53b18] hover:text-white
-                hover:shadow-[0_4px_12px_rgba(181,59,24,0.3)]
-                focus:outline-none focus:ring-2 focus:ring-[#b53b18]/40
-              ">
-                Ver Eventos
-              </button>
             </Link>
           </div>
         </div>
