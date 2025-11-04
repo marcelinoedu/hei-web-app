@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import DecoButton from "@/components/DecoButton";
 
+
 export default function Home() {
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -67,22 +68,16 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Título Principal */}
           <h1 className="text-5xl md:text-7xl font-display tracking-wide text-[#3a2418] leading-tight">
-            Conecte-se com as{" "}
-            <span className="text-[#b53b18]">Organizações Estudantis</span>{" "}
-            do Insper
+            Gerencie as Organizações estudantis do Insper com Facilidade
           </h1>
 
-          {/* Subtítulo */}
-          <p className="text-lg md:text-xl text-[#6d4b35] max-w-2xl mx-auto">
-            Descubra entidades, participe de eventos e faça parte de uma comunidade vibrante e engajada.
-          </p>
-
+   
+   
           {/* Botões de Ação */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Link href="/organizacoes" className="w-full sm:w-auto">
               <DecoButton className="w-full sm:w-auto flex  gap-2 px-8 py-4 text-lg">
-                <span>Explorar Organizações</span>
-
+                <span>Ver organizações</span>
               </DecoButton>
             </Link>
           </div>

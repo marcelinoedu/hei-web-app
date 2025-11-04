@@ -2,6 +2,10 @@ import Link from "next/link";
 import DecoButton from "@/components/DecoButton";
 
 export default function LoginPage() {
+
+  // fazer chamada para api de login
+  // salvar token ou cookies
+
   return (
     <form className="space-y-6">
       {/* Campo de email */}
