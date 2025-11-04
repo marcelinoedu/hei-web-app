@@ -258,8 +258,12 @@ export default function DetalhesOrganizacao() {
           throw new Error(errorMsg);
         }
 
-        // Recarregar dados da organização
+        // A API agora retorna a lista atualizada de alunos
+        const alunosAtualizados = await response.json();
+        
+        // Atualizar a organização com os alunos atualizados
         const orgData = await fetchOrganizacaoData(organizacao.name || organizacao.nome);
+        orgData.alunos = alunosAtualizados;
         setOrganizacao(orgData);
         alert("Aluno adicionado com sucesso!");
       }
@@ -291,8 +295,12 @@ export default function DetalhesOrganizacao() {
       );
       await handleApiError(response, router);
 
-      // Recarregar dados da organização
+      // A API agora retorna a lista atualizada de alunos
+      const alunosAtualizados = await response.json();
+      
+      // Atualizar a organização com os alunos atualizados
       const orgData = await fetchOrganizacaoData(organizacao.name || organizacao.nome);
+      orgData.alunos = alunosAtualizados;
       setOrganizacao(orgData);
       alert("Aluno removido com sucesso!");
     } catch (error) {
