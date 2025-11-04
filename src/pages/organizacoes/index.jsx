@@ -1,48 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import DecoButton from "@/components/DecoButton";
+import Header from "@/components/Header";
+import { getAuthHeaders, handleApiError } from "@/utils/auth";
 
 export default function Organizacoes() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
-    nicho: ""
+    nicho: "",
+    area: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [organizacoes, setOrganizacoes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dados mock para desenvolvimento
-  const [organizacoes, setOrganizacoes] = useState([
-    {
-      nome: "Hei",
-      nicho: "Tecnologia",
-      area: "Inovação e Desenvolvimento"
-    },
-    {
-      nome: "Tech Society",
-      nicho: "Engenharia",
-      area: "Software e Hardware"
-    },
-    {
-      nome: "Business Club",
-      nicho: "Negócios",
-      area: "Consultoria e Empreendedorismo"
-    },
-    {
-      nome: "Finance Lab",
-      nicho: "Finanças",
-      area: "Mercados e Investimentos"
-    },
-    {
-      nome: "Design Studio",
-      nicho: "Design",
-      area: "UI/UX e Comunicação Visual"
-    },
-    {
-      nome: "Data Science Hub",
-      nicho: "Ciência de Dados",
-      area: "Analytics e Machine Learning"
-    }
-  ]);
+  // Carregar organizações do backend
+  useEffect(() => {
+    const fetchOrganizacoes = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/entidades`);
+        await handleApiError(response, router);
+        const data = await response.json();
+        setOrganizacoes(data);
+      } catch (error) {
+        console.error("Erro ao carregar organizações:", error);
+        alert("Erro ao carregar organizações. Tente novamente.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrganizacoes();
+  }, []);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -54,7 +47,7 @@ export default function Organizacoes() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.nome || !formData.nicho) {
+    if (!formData.nome || !formData.nicho || !formData.area) {
       alert("Por favor, preencha todos os campos");
       return;
     }
@@ -62,17 +55,17 @@ export default function Organizacoes() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Quando o backend estiver pronto, descomentar o fetch
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/entidades`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(formData)
-      // });
-      // if (!response.ok) throw new Error("Erro ao criar organização");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/entidades`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(formData)
+      });
+      await handleApiError(response, router);
+      const novaOrganizacao = await response.json();
 
-      setOrganizacoes([...organizacoes, formData]);
+      setOrganizacoes([...organizacoes, novaOrganizacao]);
       setIsModalOpen(false);
-      setFormData({ nome: "", nicho: "" });
+      setFormData({ nome: "", nicho: "", area: "" });
       alert("Organização criada com sucesso!");
     } catch (error) {
       console.error("Erro ao criar organização:", error);
@@ -84,7 +77,7 @@ export default function Organizacoes() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setFormData({ nome: "", nicho: "" });
+    setFormData({ nome: "", nicho: "", area: "" });
   };
 
   return (
@@ -127,24 +120,7 @@ export default function Organizacoes() {
       </div>
 
       {/* Header */}
-      <header className="relative z-20 px-6 md:px-12 py-6">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#ffeedb] to-[#fcd8b4] border border-[rgba(0,0,0,0.05)] shadow-inner flex items-center justify-center">
-              <div className="w-6 h-6 rounded-sm bg-gradient-to-br from-[#ff7a2d] to-[#b53b18] shadow-md"></div>
-            </div>
-            <span className="text-xl font-display tracking-wide text-[#3a2418] font-bold">
-              Hub Insper
-            </span>
-          </Link>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/organizacoes" className="text-[#b53b18] font-medium">
-              Organizações
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Conteúdo Principal */}
       <main className="relative z-10 pt-20 pb-32 px-6">
@@ -164,12 +140,20 @@ export default function Organizacoes() {
             </p>
           </div>
 
+          {/* Loading state */}
+          {loading && (
+            <div className="text-center py-20">
+              <div className="inline-block w-12 h-12 border-4 border-[#b53b18] border-t-transparent rounded-full animate-spin"></div>
+              <p className="mt-4 text-[#6d4b35]">Carregando organizações...</p>
+            </div>
+          )}
+
           {/* Grid de Organizações */}
-          {organizacoes.length > 0 && (
+          {!loading && organizacoes.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {organizacoes.map((org, index) => (
+              {organizacoes.map((org) => (
                 <div
-                  key={index}
+                  key={org.nome}
                   className="
                     group relative
                     rounded-2xl p-8
@@ -224,6 +208,14 @@ export default function Organizacoes() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!loading && organizacoes.length === 0 && (
+            <div className="text-center py-20">
+              <p className="text-xl text-[#6d4b35] mb-4">Nenhuma organização encontrada</p>
+              <p className="text-[#6d4b35]">Crie sua primeira organização clicando no botão acima</p>
             </div>
           )}
         </div>
@@ -332,6 +324,28 @@ export default function Organizacoes() {
                       transition
                     "
                     placeholder="Ex: Tecnologia"
+                    required
+                  />
+                </label>
+
+                {/* Área de Atuação */}
+                <label className="block">
+                  <span className="text-sm font-medium text-[#b53b18]">Área de Atuação</span>
+                  <input
+                    type="text"
+                    name="area"
+                    value={formData.area}
+                    onChange={handleInputChange}
+                    className="
+                      mt-1 w-full rounded-md p-3 
+                      bg-[rgba(255,255,255,0.75)] 
+                      border border-[#e2c6a4]
+                      text-[#3a2418]
+                      placeholder-[#a88967]
+                      focus:outline-none focus:ring-2 focus:ring-[#ff7a2d]/40
+                      transition
+                    "
+                    placeholder="Ex: Desenvolvimento de Software"
                     required
                   />
                 </label>
