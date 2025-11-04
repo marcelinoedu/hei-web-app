@@ -1,9 +1,10 @@
-export default function DecoButton({ children, onClick, type = "button" }) {
+export default function DecoButton({ children, onClick, type = "button", disabled, className = "" }) {
   return (
     <button
       type={type}
       onClick={onClick}
-      className="
+      disabled={disabled}
+      className={`
         relative 
         px-6 py-3 
         font-display text-[15px] tracking-wide 
@@ -18,7 +19,9 @@ export default function DecoButton({ children, onClick, type = "button" }) {
         active:translate-y-[1px] active:shadow-inner
         focus:outline-none focus:ring-2 focus:ring-[#ff7a2d]/40 focus:ring-offset-2 focus:ring-offset-[#f3e7d6]
         cursor-pointer
-      "
+        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0
+        ${className}
+      `}
       style={{
         backgroundImage:
           "linear-gradient(135deg, #ffb46a 0%, #ff7a2d 40%, #b53b18 100%)",
