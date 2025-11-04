@@ -83,11 +83,9 @@ export default function Home() {
           {/* Botões de Ação */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Link href="/organizacoes" className="w-full sm:w-auto">
-              <DecoButton className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 text-lg">
-                Explorar Organizações
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+              <DecoButton className="w-full sm:w-auto flex  gap-2 px-8 py-4 text-lg">
+                <span>Explorar Organizações</span>
+
               </DecoButton>
             </Link>
             
