@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import DecoButton from "@/components/DecoButton";
+import Header from "@/components/Header";
+import { getAuthHeaders, handleApiError } from "@/utils/auth";
 
 export default function Eventos() {
+  const router = useRouter();
   const [reunioes, setReunioes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,59 +27,13 @@ export default function Eventos() {
   const fetchReunioes = async () => {
     try {
       setLoading(true);
-      // TODO: Quando o backend estiver pronto, descomentar o fetch
-      // const response = await fetch("http://localhost:8080/reunioes");
-      // if (!response.ok) {
-      //   throw new Error("Erro ao carregar eventos");
-      // }
-      // const data = await response.json();
-      // setReunioes(data);
-
-      // Dados mock para desenvolvimento
-      setReunioes([
-        {
-          id: 1,
-          titulo: "Hackathon Tech 2024",
-          descricao: "Competição de programação com 48 horas de duração",
-          data: "2024-12-15",
-          local: "Campus Insper - Sala 301",
-          entidade: { name: "Hei" }
-        },
-        {
-          id: 2,
-          titulo: "Workshop de Machine Learning",
-          descricao: "Aprenda os fundamentos de ML com casos práticos",
-          data: "2024-12-20",
-          local: "Campus Insper - Laboratório 2",
-          entidade: { name: "Hei" }
-        },
-        {
-          id: 3,
-          titulo: "Feira de Projetos de Engenharia",
-          descricao: "Apresentação de projetos inovadores dos estudantes",
-          data: "2025-01-15",
-          local: "Campus Insper - Área Externa",
-          entidade: { name: "Tech Society" }
-        },
-        {
-          id: 4,
-          titulo: "Case Competition 2025",
-          descricao: "Competição de casos de negócios entre equipes",
-          data: "2025-02-01",
-          local: "Campus Insper - Auditório Principal",
-          entidade: { name: "Business Club" }
-        },
-        {
-          id: 5,
-          titulo: "Meetup com Profissionais",
-          descricao: "Networking com profissionais da área de tecnologia",
-          data: "2025-01-10",
-          local: "Campus Insper - Auditório",
-          entidade: { name: "Hei" }
-        }
-      ]);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes`);
+      await handleApiError(response, router);
+      const data = await response.json();
+      setReunioes(data);
     } catch (error) {
       console.error("Erro ao buscar eventos:", error);
+      alert("Erro ao carregar eventos. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -136,48 +94,40 @@ export default function Eventos() {
     try {
       if (editingEvento) {
         // Editar evento
-        // TODO: Quando o backend estiver pronto, descomentar o fetch
-        // const response = await fetch(`http://localhost:8080/reunioes/${editingEvento.id}`, {
-        //   method: "PUT",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({
-        //     titulo: formData.titulo,
-        //     descricao: formData.descricao,
-        //     data: formData.data,
-        //     local: formData.local
-        //   })
-        // });
-        // if (!response.ok) throw new Error("Erro ao editar evento");
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/${editingEvento.id}`, {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            titulo: formData.titulo,
+            descricao: formData.descricao,
+            data: formData.data,
+            local: formData.local
+          })
+        });
+        await handleApiError(response, router);
+        const eventoAtualizado = await response.json();
 
-        // Mock: atualizar na lista
         setReunioes(reunioes.map(r => 
           r.id === editingEvento.id 
-            ? { ...r, ...formData, entidade: { name: formData.nomeEntidade } }
+            ? eventoAtualizado
             : r
         ));
         alert("Evento editado com sucesso!");
       } else {
         // Criar evento
-        // TODO: Quando o backend estiver pronto, descomentar o fetch
-        // const response = await fetch("http://localhost:8080/reunioes", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({
-        //     titulo: formData.titulo,
-        //     descricao: formData.descricao,
-        //     data: formData.data,
-        //     local: formData.local,
-        //     entidade: { name: formData.nomeEntidade }
-        //   })
-        // });
-        // if (!response.ok) throw new Error("Erro ao criar evento");
-
-        // Mock: adicionar à lista
-        const novoEvento = {
-          id: Date.now(),
-          ...formData,
-          entidade: { name: formData.nomeEntidade }
-        };
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            titulo: formData.titulo,
+            descricao: formData.descricao,
+            data: formData.data,
+            local: formData.local,
+            entidade: { name: formData.nomeEntidade }
+          })
+        });
+        await handleApiError(response, router);
+        const novoEvento = await response.json();
         setReunioes([...reunioes, novoEvento]);
         alert("Evento criado com sucesso!");
       }
@@ -197,13 +147,12 @@ export default function Eventos() {
     }
 
     try {
-      // TODO: Quando o backend estiver pronto, descomentar o fetch
-      // const response = await fetch(`http://localhost:8080/reunioes/${evento.id}`, {
-      //   method: "DELETE"
-      // });
-      // if (!response.ok) throw new Error("Erro ao excluir evento");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/${evento.id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+      });
+      await handleApiError(response, router);
 
-      // Mock: remover da lista
       setReunioes(reunioes.filter(r => r.id !== evento.id));
       alert("Evento excluído com sucesso!");
     } catch (error) {
@@ -252,27 +201,7 @@ export default function Eventos() {
       </div>
 
       {/* Header */}
-      <header className="relative z-20 px-6 md:px-12 py-6">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#ffeedb] to-[#fcd8b4] border border-[rgba(0,0,0,0.05)] shadow-inner flex items-center justify-center">
-              <div className="w-6 h-6 rounded-sm bg-gradient-to-br from-[#ff7a2d] to-[#b53b18] shadow-md"></div>
-            </div>
-            <span className="text-xl font-display tracking-wide text-[#3a2418] font-bold">
-              Hub Insper
-            </span>
-          </Link>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/organizacoes" className="text-[#3a2418] hover:text-[#b53b18] transition-colors font-medium">
-              Organizações
-            </Link>
-            <Link href="/eventos" className="text-[#b53b18] font-medium">
-              Eventos
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Conteúdo Principal */}
       <main className="relative z-10 pt-20 pb-32 px-6">

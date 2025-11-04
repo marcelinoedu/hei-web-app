@@ -2,6 +2,8 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import DecoButton from "@/components/DecoButton";
+import Header from "@/components/Header";
+import { getAuthHeaders, handleApiError } from "@/utils/auth";
 
 export default function DetalhesOrganizacao() {
   const router = useRouter();
@@ -16,7 +18,7 @@ export default function DetalhesOrganizacao() {
     semestre: "",
     celular: ""
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingAluno, setIsSubmittingAluno] = useState(false);
   const [isModalReuniaoOpen, setIsModalReuniaoOpen] = useState(false);
   const [editingReuniao, setEditingReuniao] = useState(null);
   const [formDataReuniao, setFormDataReuniao] = useState({
@@ -27,201 +29,56 @@ export default function DetalhesOrganizacao() {
   });
   const [isSubmittingReuniao, setIsSubmittingReuniao] = useState(false);
 
-  // Função para obter dados mock baseado no nome
-  const getMockData = (nomeOrg) => {
-    const mockData = {
-      "Hei": {
-        nome: "Hei",
-        nicho: "Tecnologia",
-        alunos: [
-          {
-            id: 1,
-            nome: "João Silva",
-            email: "joao.silva@insper.edu.br",
-            cpf: "123.456.789-00",
-            semestre: 5,
-            celular: "(11) 98765-4321",
-            curso: { nome: "Engenharia de Computação" }
-          },
-          {
-            id: 2,
-            nome: "Maria Santos",
-            email: "maria.santos@insper.edu.br",
-            cpf: "987.654.321-00",
-            semestre: 3,
-            celular: "(11) 91234-5678",
-            curso: { nome: "Ciência da Computação" }
-          },
-          {
-            id: 3,
-            nome: "Pedro Oliveira",
-            email: "pedro.oliveira@insper.edu.br",
-            cpf: "456.789.123-00",
-            semestre: 7,
-            celular: "(11) 99876-5432",
-            curso: { nome: "Engenharia de Software" }
-          }
-        ],
-        eventos: [
-          {
-            id: 1,
-            nome: "Hackathon Tech 2024",
-            descricao: "Competição de programação com 48 horas de duração. Desenvolva soluções inovadoras com sua equipe e concorra a prêmios incríveis.",
-            data: "2024-12-15",
-            local: "Campus Insper - Sala 301"
-          },
-          {
-            id: 2,
-            nome: "Workshop de Machine Learning",
-            descricao: "Aprenda os fundamentos de ML com casos práticos. Traga seu notebook e participe de exercícios hands-on.",
-            data: "2024-12-20",
-            local: "Campus Insper - Laboratório 2"
-          },
-          {
-            id: 3,
-            nome: "Tech Talk: Inteligência Artificial",
-            descricao: "Palestra sobre as tendências atuais em IA com especialistas da indústria. Networking após o evento.",
-            data: "2025-01-10",
-            local: "Campus Insper - Auditório"
-          },
-          {
-            id: 4,
-            nome: "Maratona de Programação",
-            descricao: "Desafie-se em problemas de algoritmos e estruturas de dados. Aberto para todos os níveis.",
-            data: "2025-01-25",
-            local: "Campus Insper - Laboratório de Informática"
-          }
-        ]
-      },
-      "Tech Society": {
-        nome: "Tech Society",
-        nicho: "Engenharia",
-        alunos: [
-          {
-            id: 4,
-            nome: "Ana Costa",
-            email: "ana.costa@insper.edu.br",
-            cpf: "111.222.333-44",
-            semestre: 4,
-            celular: "(11) 94444-5555",
-            curso: { nome: "Engenharia Mecânica" }
-          },
-          {
-            id: 5,
-            nome: "Carlos Mendes",
-            email: "carlos.mendes@insper.edu.br",
-            cpf: "555.666.777-88",
-            semestre: 6,
-            celular: "(11) 96666-7777",
-            curso: { nome: "Engenharia Elétrica" }
-          }
-        ],
-        eventos: [
-          {
-            id: 5,
-            nome: "Feira de Projetos de Engenharia",
-            descricao: "Apresentação de projetos inovadores dos estudantes. Venha conhecer soluções criativas em diversas áreas da engenharia.",
-            data: "2025-01-15",
-            local: "Campus Insper - Área Externa"
-          },
-          {
-            id: 6,
-            nome: "Workshop de Robótica",
-            descricao: "Construa seu próprio robô e participe de competições. Materiais fornecidos pela organização.",
-            data: "2025-02-05",
-            local: "Campus Insper - Laboratório de Mecatrônica"
-          },
-          {
-            id: 7,
-            nome: "Visita Técnica: Fábrica de Automação",
-            descricao: "Tour guiado em empresa de automação industrial. Vagas limitadas, inscrições antecipadas necessárias.",
-            data: "2025-02-20",
-            local: "A definir - Transporte fornecido"
-          }
-        ]
-      },
-      "Business Club": {
-        nome: "Business Club",
-        nicho: "Negócios",
-        alunos: [
-          {
-            id: 6,
-            nome: "Fernanda Lima",
-            email: "fernanda.lima@insper.edu.br",
-            cpf: "999.888.777-66",
-            semestre: 2,
-            celular: "(11) 98888-9999",
-            curso: { nome: "Administração" }
-          }
-        ],
-        eventos: [
-          {
-            id: 8,
-            nome: "Case Competition 2025",
-            descricao: "Competição de casos de negócios entre equipes. Desenvolva estratégias e apresente para jurados da indústria.",
-            data: "2025-02-01",
-            local: "Campus Insper - Auditório Principal"
-          },
-          {
-            id: 9,
-            nome: "Networking Night: Carreiras em Negócios",
-            descricao: "Conecte-se com profissionais e ex-alunos. Traga seu currículo e participe de conversas enriquecedoras.",
-            data: "2025-02-15",
-            local: "Campus Insper - Salão de Eventos"
-          },
-          {
-            id: 10,
-            nome: "Workshop: Pitch Perfect",
-            descricao: "Aprenda a fazer apresentações impactantes. Treine seu pitch e receba feedback de investidores.",
-            data: "2025-03-01",
-            local: "Campus Insper - Sala de Reuniões 3"
-          },
-          {
-            id: 11,
-            nome: "Feira de Estágios e Trainees",
-            descricao: "Conheça oportunidades de estágio e trainee em grandes empresas. Traga seu currículo impresso.",
-            data: "2025-03-10",
-            local: "Campus Insper - Área Comum"
-          }
-        ]
-      }
-    };
-
-    return mockData[nomeOrg] || {
-      nome: nomeOrg,
-      nicho: "Geral",
-      alunos: [],
-      eventos: []
+  // Função auxiliar para buscar organização ignorando referências circulares
+  const fetchOrganizacaoData = async (nomeOrg) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/entidades/${encodeURIComponent(nomeOrg)}`);
+    if (!response.ok) throw new Error("Erro ao buscar organização");
+    
+    const text = await response.text();
+    
+    // Extrair campos básicos antes do loop infinito começar
+    const idMatch = text.match(/"id"\s*:\s*(\d+)/);
+    const nameMatch = text.match(/"name"\s*:\s*"([^"]+)"/);
+    const nichoMatch = text.match(/"nicho"\s*:\s*"([^"]+)"/);
+    const areasMatch = text.match(/"areas"\s*:\s*"([^"]*)"/);
+    
+    // Buscar reuniões e alunos em paralelo
+    const [reunioesResponse, alunosResponse] = await Promise.all([
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/entidade/${encodeURIComponent(nomeOrg)}`),
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/entidades/${encodeURIComponent(nomeOrg)}/alunos`)
+    ]);
+    
+    const reunioesData = reunioesResponse.ok ? await reunioesResponse.json() : [];
+    const alunosData = alunosResponse.ok ? await alunosResponse.json() : [];
+    
+    return {
+      id: idMatch ? parseInt(idMatch[1]) : null,
+      name: nameMatch ? nameMatch[1] : nomeOrg,
+      nicho: nichoMatch ? nichoMatch[1] : '',
+      areas: areasMatch ? areasMatch[1] : '',
+      eventos: reunioesData.map(r => ({
+        id: r.id,
+        nome: r.titulo,
+        descricao: r.descricao || "",
+        data: r.data,
+        local: r.local || ""
+      })),
+      alunos: alunosData
     };
   };
 
   useEffect(() => {
     if (nome) {
       const nomeDecodificado = decodeURIComponent(nome);
-      // TODO: Quando o backend estiver pronto, descomentar o fetch
-      // Promise.all([
-      //   fetch(`http://localhost:8080/entidades/${encodeURIComponent(nomeDecodificado)}`).then(res => res.json()),
-      //   fetch(`http://localhost:8080/reunioes/entidade/${encodeURIComponent(nomeDecodificado)}`).then(res => res.json())
-      // ])
-      //   .then(([orgData, reunioesData]) => {
-      //     setOrganizacao({
-      //       ...orgData,
-      //       eventos: reunioesData.map(r => ({
-      //         id: r.id,
-      //         nome: r.titulo,
-      //         descricao: r.descricao || "",
-      //         data: r.data,
-      //         local: r.local || ""
-      //       }))
-      //     });
-      //   })
-      //   .catch(err => {
-      //     console.error("Erro ao buscar dados:", err);
-      //     setOrganizacao(getMockData(nomeDecodificado));
-      //   });
       
-      // Dados mock por enquanto
-      setOrganizacao(getMockData(nomeDecodificado));
+      fetchOrganizacaoData(nomeDecodificado)
+        .then(orgData => {
+          setOrganizacao(orgData);
+        })
+        .catch(err => {
+          console.error("Erro ao buscar dados:", err);
+          alert("Erro ao carregar dados da organização. Tente novamente.");
+        });
     }
   }, [nome]);
 
@@ -270,85 +127,144 @@ export default function DetalhesOrganizacao() {
   const handleSubmitAluno = async (e) => {
     e.preventDefault();
     
+    // Validação de campos obrigatórios
     if (!formDataAluno.nome.trim() || !formDataAluno.cpf.trim()) {
       alert("Por favor, preencha nome e CPF");
       return;
     }
 
+    // Validação de email - obrigatório no backend
+    if (!formDataAluno.email.trim()) {
+      alert("Por favor, preencha o email");
+      return;
+    }
+
+    // Validação de celular - obrigatório no backend
+    if (!formDataAluno.celular.trim()) {
+      alert("Por favor, preencha o celular");
+      return;
+    }
+
     if (!organizacao) return;
 
-    setIsSubmitting(true);
+    setIsSubmittingAluno(true);
 
     try {
       if (editingAluno) {
         // Editar aluno
-        const response = await fetch(
-          `http://localhost:8080/alunos/${editingAluno.cpf}`,
-          {
-            method: "PUT",
-            headers: { 
-              "Content-Type": "application/json",
-              "Authorization": "Bearer token" // TODO: Adicionar token real quando autenticação estiver pronta
-            },
-            body: JSON.stringify({
-              nome: formDataAluno.nome,
-              email: formDataAluno.email,
-              cpf: formDataAluno.cpf,
-              semestre: parseInt(formDataAluno.semestre) || 1,
-              celular: formDataAluno.celular
-            })
-          }
-        );
-        if (!response.ok) throw new Error("Erro ao editar aluno");
-
-        // Atualizar na lista local
-        setOrganizacao({
-          ...organizacao,
-          alunos: organizacao.alunos.map(a => 
-            a.id === editingAluno.id 
-              ? { 
-                  ...a,
-                  nome: formDataAluno.nome,
-                  email: formDataAluno.email,
-                  cpf: formDataAluno.cpf,
-                  semestre: parseInt(formDataAluno.semestre) || 1,
-                  celular: formDataAluno.celular
-                }
-              : a
-          )
-        });
-        alert("Aluno editado com sucesso!");
-      } else {
-        // Adicionar aluno
-        // TODO: Quando o backend estiver pronto, descomentar o fetch
-        // const response = await fetch(
-        //   `http://localhost:8080/entidades/${encodeURIComponent(organizacao.nome)}/adicionar-aluno`,
-        //   {
-        //     method: "POST",
-        //     headers: { 
-        //       "Content-Type": "application/json",
-        //       "Authorization": "Bearer token"
-        //     },
-        //     body: JSON.stringify({ nome: formDataAluno.nome })
-        //   }
-        // );
-        // if (!response.ok) throw new Error("Erro ao adicionar aluno");
-
-        // Mock: adicionar aluno à lista
-        const novoAluno = {
-          id: Date.now(),
-          nome: formDataAluno.nome,
-          email: formDataAluno.email || `${formDataAluno.nome.toLowerCase().replace(/\s+/g, '.')}@insper.edu.br`,
-          cpf: formDataAluno.cpf,
-          semestre: parseInt(formDataAluno.semestre) || 1,
-          celular: formDataAluno.celular || "(11) 00000-0000",
-          curso: { nome: "Curso" }
+        const alunoData = {
+          nome: formDataAluno.nome.trim(),
+          email: formDataAluno.email.trim(),
+          cpf: formDataAluno.cpf.trim().replace(/\D/g, ''), // Remove formatação do CPF
+          semestre: formDataAluno.semestre ? parseInt(formDataAluno.semestre) : 1,
+          celular: formDataAluno.celular.trim()
         };
 
-        setOrganizacao({
-          ...organizacao,
-          alunos: [...organizacao.alunos, novoAluno]
-        });
+        // Validar campos obrigatórios
+        if (!alunoData.nome || !alunoData.cpf || !alunoData.email || !alunoData.celular) {
+          alert("Nome, CPF, email e celular são obrigatórios");
+          setIsSubmittingAluno(false);
+          return;
+        }
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/alunos/${editingAluno.cpf}`,
+          {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(alunoData)
+          }
+        );
+        await handleApiError(response, router);
+
+        // Recarregar dados da organização
+        const orgData = await fetchOrganizacaoData(organizacao.name || organizacao.nome);
+        setOrganizacao(orgData);
+        alert("Aluno editado com sucesso!");
+      } else {
+        // Adicionar aluno - primeiro criar o aluno, depois adicionar à organização
+        // Preparar dados do aluno, garantindo que campos obrigatórios não sejam vazios
+        const alunoData = {
+          nome: formDataAluno.nome.trim(),
+          email: formDataAluno.email.trim(),
+          cpf: formDataAluno.cpf.trim().replace(/\D/g, ''), // Remove formatação do CPF
+          semestre: formDataAluno.semestre ? parseInt(formDataAluno.semestre) : 1,
+          celular: formDataAluno.celular.trim()
+        };
+
+        // Validar campos obrigatórios
+        if (!alunoData.nome || !alunoData.cpf || !alunoData.email || !alunoData.celular) {
+          throw new Error("Nome, CPF, email e celular são obrigatórios");
+        }
+
+        // Primeiro, tentar criar o aluno
+        let alunoJaExiste = false;
+        try {
+          const createAlunoResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/alunos`,
+            {
+              method: "POST",
+              headers: getAuthHeaders(),
+              body: JSON.stringify(alunoData)
+            }
+          );
+          
+          if (createAlunoResponse.status === 400) {
+            const errorText = await createAlunoResponse.text();
+            if (errorText.includes("já está cadastrado")) {
+              alunoJaExiste = true;
+            } else {
+              // Se for outro erro, mostrar a mensagem
+              const errorMsg = errorText || "Erro ao criar aluno";
+              alert(errorMsg);
+              throw new Error(errorMsg);
+            }
+          } else if (!createAlunoResponse.ok) {
+            await handleApiError(createAlunoResponse, router);
+          }
+        } catch (createError) {
+          // Se o erro não for "já cadastrado", re-lançar
+          if (!createError.message.includes("já está cadastrado")) {
+            throw createError;
+          }
+          alunoJaExiste = true;
+        }
+
+        // Preparar objeto para adicionar à organização (backend espera objeto Alunos completo)
+        // O backend busca pelo nome, mas precisa receber um objeto Alunos válido
+        const alunoParaAdicionar = {
+          nome: alunoData.nome,
+          email: alunoData.email,
+          cpf: alunoData.cpf,
+          semestre: alunoData.semestre,
+          celular: alunoData.celular
+        };
+
+        // Adicionar o aluno à organização
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/entidades/${encodeURIComponent(organizacao.name || organizacao.nome)}/adicionar-aluno`,
+          {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(alunoParaAdicionar)
+          }
+        );
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          const errorMsg = errorText || `Erro ao adicionar aluno à organização: ${response.status}`;
+          console.error("Erro ao adicionar aluno:", errorMsg);
+          alert(errorMsg);
+          throw new Error(errorMsg);
+        }
+
+        // A API agora retorna a lista atualizada de alunos
+        const alunosAtualizados = await response.json();
+        
+        // Atualizar a organização com os alunos atualizados
+        const orgData = await fetchOrganizacaoData(organizacao.name || organizacao.nome);
+        orgData.alunos = alunosAtualizados;
+        setOrganizacao(orgData);
         alert("Aluno adicionado com sucesso!");
       }
 
@@ -357,7 +273,7 @@ export default function DetalhesOrganizacao() {
       console.error("Erro ao salvar aluno:", error);
       alert("Erro ao salvar aluno. Tente novamente.");
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingAluno(false);
     }
   };
 
@@ -369,23 +285,23 @@ export default function DetalhesOrganizacao() {
     }
 
     try {
-      // TODO: Quando o backend estiver pronto, descomentar o fetch
-      // const response = await fetch(
-      //   `http://localhost:8080/entidades/${encodeURIComponent(organizacao.nome)}/remover-aluno`,
-      //   {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify({ nome: aluno.nome })
-      //   }
-      // );
-      // if (!response.ok) throw new Error("Erro ao remover aluno");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/entidades/${encodeURIComponent(organizacao.name || organizacao.nome)}/remover-aluno`,
+        {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(aluno)
+        }
+      );
+      await handleApiError(response, router);
 
-      // Mock: remover aluno da lista
-      setOrganizacao({
-        ...organizacao,
-        alunos: organizacao.alunos.filter(a => a.id !== aluno.id)
-      });
-
+      // A API agora retorna a lista atualizada de alunos
+      const alunosAtualizados = await response.json();
+      
+      // Atualizar a organização com os alunos atualizados
+      const orgData = await fetchOrganizacaoData(organizacao.name || organizacao.nome);
+      orgData.alunos = alunosAtualizados;
+      setOrganizacao(orgData);
       alert("Aluno removido com sucesso!");
     } catch (error) {
       console.error("Erro ao remover aluno:", error);
@@ -447,9 +363,9 @@ export default function DetalhesOrganizacao() {
     try {
       if (editingReuniao) {
         // Editar reunião
-        const response = await fetch(`http://localhost:8080/reunioes/${editingReuniao.id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/${editingReuniao.id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify({
             titulo: formDataReuniao.titulo,
             descricao: formDataReuniao.descricao,
@@ -457,51 +373,30 @@ export default function DetalhesOrganizacao() {
             local: formDataReuniao.local
           })
         });
-        if (!response.ok) throw new Error("Erro ao editar reunião");
+        await handleApiError(response, router);
 
-        // Atualizar na lista local
-        setOrganizacao({
-          ...organizacao,
-          eventos: organizacao.eventos.map(e => 
-            e.id === editingReuniao.id 
-              ? { 
-                  id: e.id,
-                  nome: formDataReuniao.titulo,
-                  descricao: formDataReuniao.descricao,
-                  data: formDataReuniao.data,
-                  local: formDataReuniao.local
-                }
-              : e
-          )
-        });
+        // Recarregar dados da organização
+        const orgData = await fetchOrganizacaoData(organizacao.name || organizacao.nome);
+        setOrganizacao(orgData);
         alert("Reunião editada com sucesso!");
       } else {
         // Criar reunião
-        const response = await fetch("http://localhost:8080/reunioes", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify({
             titulo: formDataReuniao.titulo,
             descricao: formDataReuniao.descricao,
             data: formDataReuniao.data,
             local: formDataReuniao.local,
-            entidade: { name: organizacao.nome }
+            entidade: { name: organizacao.name || organizacao.nome }
           })
         });
-        if (!response.ok) throw new Error("Erro ao criar reunião");
-        const novaReuniao = await response.json();
+        await handleApiError(response, router);
 
-        // Adicionar à lista local
-        setOrganizacao({
-          ...organizacao,
-          eventos: [...organizacao.eventos, {
-            id: novaReuniao.id,
-            nome: novaReuniao.titulo,
-            descricao: novaReuniao.descricao || "",
-            data: novaReuniao.data,
-            local: novaReuniao.local || ""
-          }]
-        });
+        // Recarregar dados da organização
+        const orgData = await fetchOrganizacaoData(organizacao.name || organizacao.nome);
+        setOrganizacao(orgData);
         alert("Reunião criada com sucesso!");
       }
 
@@ -520,16 +415,15 @@ export default function DetalhesOrganizacao() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/reunioes/${reuniao.id}`, {
-        method: "DELETE"
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reunioes/${reuniao.id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
       });
-      if (!response.ok) throw new Error("Erro ao excluir reunião");
+      await handleApiError(response, router);
 
-      // Remover da lista local
-      setOrganizacao({
-        ...organizacao,
-        eventos: organizacao.eventos.filter(e => e.id !== reuniao.id)
-      });
+      // Recarregar dados da organização
+      const orgData = await fetchOrganizacaoData(organizacao.name || organizacao.nome);
+      setOrganizacao(orgData);
       alert("Reunião excluída com sucesso!");
     } catch (error) {
       console.error("Erro ao excluir reunião:", error);
@@ -588,24 +482,7 @@ export default function DetalhesOrganizacao() {
       </div>
 
       {/* Header */}
-      <header className="relative z-20 px-6 md:px-12 py-6">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <Link href="/organizacoes" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#ffeedb] to-[#fcd8b4] border border-[rgba(0,0,0,0.05)] shadow-inner flex items-center justify-center">
-              <div className="w-6 h-6 rounded-sm bg-gradient-to-br from-[#ff7a2d] to-[#b53b18] shadow-md"></div>
-            </div>
-            <span className="text-xl font-display tracking-wide text-[#3a2418] font-bold">
-              Hub Insper
-            </span>
-          </Link>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/organizacoes" className="text-[#b53b18] font-medium">
-              Organizações
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Conteúdo Principal */}
       <main className="relative z-10 pt-10 pb-32 px-6">
@@ -630,7 +507,7 @@ export default function DetalhesOrganizacao() {
               </button>
               <div>
                 <h1 className="text-4xl md:text-5xl font-display tracking-wide text-[#3a2418] mb-2">
-                  {organizacao.nome}
+                  {organizacao.name || organizacao.nome}
                 </h1>
                 <span className="
                   inline-block px-4 py-1
@@ -671,15 +548,15 @@ export default function DetalhesOrganizacao() {
                   </svg>
                 </button>
               </div>
-              {organizacao.alunos.length === 0 ? (
+              {!organizacao.alunos || organizacao.alunos.length === 0 ? (
                 <div className="text-center py-12 bg-[rgba(255,255,255,0.5)] rounded-2xl border border-[#e2c6a4]">
                   <p className="text-[#6d4b35]">Nenhum aluno cadastrado nesta organização</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {organizacao.alunos.map((aluno) => (
+                  {organizacao.alunos.map((aluno, index) => (
                     <div
-                      key={aluno.id}
+                      key={index}
                       className="
                         rounded-2xl p-6
                       bg-gradient-to-br from-[rgba(255,252,248,0.95)] to-[rgba(255,245,230,0.92)]
@@ -692,7 +569,7 @@ export default function DetalhesOrganizacao() {
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1), inset 0 0 6px rgba(255,220,180,0.4)",
                     }}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-start justify-between mb-3">
                       <h3 className="text-xl font-display text-[#3a2418]">{aluno.nome}</h3>
                       <div className="flex items-center gap-2">
                         <button
@@ -731,9 +608,10 @@ export default function DetalhesOrganizacao() {
                     </div>
                     <div className="space-y-1 text-sm text-[#6d4b35]">
                       <p><span className="font-medium">Email:</span> {aluno.email}</p>
-                      <p><span className="font-medium">Curso:</span> {aluno.curso.nome}</p>
                       <p><span className="font-medium">Semestre:</span> {aluno.semestre}º</p>
-                      <p><span className="font-medium">Celular:</span> {aluno.celular}</p>
+                      {aluno.celular && (
+                        <p><span className="font-medium">Celular:</span> {aluno.celular}</p>
+                      )}
                     </div>
                   </div>
                   ))}
@@ -857,203 +735,6 @@ export default function DetalhesOrganizacao() {
           <path d="M0,80 C200,160 400,0 800,80 L800,200 L0,200 Z" fill="#d5b48f" />
         </svg>
       </div>
-
-      {/* Modal de Adicionar/Editar Aluno */}
-      {isModalAlunoOpen && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
-          style={{ backdropFilter: 'blur(8px)' }}
-          onClick={handleCloseModalAluno}
-        >
-          <div className="
-            relative
-            w-full max-w-lg
-            rounded-2xl p-8
-            border
-            overflow-hidden
-            bg-gradient-to-br from-[rgba(255,252,248,0.98)] to-[rgba(255,245,230,0.95)]
-            border-[rgba(255,190,130,0.5)]
-            shadow-2xl
-          " style={{
-            boxShadow: "0 16px 32px rgba(0,0,0,0.2), inset 0 0 10px rgba(255,220,180,0.5)"
-          }}
-          onClick={(e) => e.stopPropagation()}
-          >
-            {/* Glow decorativo */}
-            <div
-              className="absolute inset-0 opacity-30 pointer-events-none"
-              style={{
-                background: "radial-gradient(circle at 80% 20%, rgba(255,160,80,0.25), transparent 60%)",
-              }}
-            />
-
-            {/* Conteúdo do Modal */}
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl md:text-3xl font-display tracking-wide text-[#3a2418]">
-                  {editingAluno ? "Editar Aluno" : "Adicionar Aluno"}
-                </h2>
-                <button
-                  onClick={handleCloseModalAluno}
-                  className="
-                    w-8 h-8
-                    flex items-center justify-center
-                    text-[#6d4b35] hover:text-[#b53b18]
-                    hover:bg-[rgba(181,59,24,0.1)]
-                    rounded-lg
-                    transition-all
-                  "
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmitAluno} className="space-y-4">
-                {/* Nome */}
-                <div>
-                  <label className="block text-sm font-medium text-[#3a2418] mb-2">
-                    Nome *
-                  </label>
-                  <input
-                    type="text"
-                    name="nome"
-                    value={formDataAluno.nome}
-                    onChange={handleInputChangeAluno}
-                    required
-                    className="
-                      w-full px-4 py-2
-                      bg-white
-                      border border-[rgba(181,59,24,0.2)]
-                      rounded-lg
-                      text-[#3a2418]
-                      focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
-                    "
-                    placeholder="Ex: João Silva"
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-[#3a2418] mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formDataAluno.email}
-                    onChange={handleInputChangeAluno}
-                    className="
-                      w-full px-4 py-2
-                      bg-white
-                      border border-[rgba(181,59,24,0.2)]
-                      rounded-lg
-                      text-[#3a2418]
-                      focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
-                    "
-                    placeholder="Ex: joao.silva@insper.edu.br"
-                  />
-                </div>
-
-                {/* CPF */}
-                <div>
-                  <label className="block text-sm font-medium text-[#3a2418] mb-2">
-                    CPF *
-                  </label>
-                  <input
-                    type="text"
-                    name="cpf"
-                    value={formDataAluno.cpf}
-                    onChange={handleInputChangeAluno}
-                    required
-                    className="
-                      w-full px-4 py-2
-                      bg-white
-                      border border-[rgba(181,59,24,0.2)]
-                      rounded-lg
-                      text-[#3a2418]
-                      focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
-                    "
-                    placeholder="Ex: 123.456.789-00"
-                  />
-                </div>
-
-                {/* Semestre e Celular */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#3a2418] mb-2">
-                      Semestre
-                    </label>
-                    <input
-                      type="number"
-                      name="semestre"
-                      value={formDataAluno.semestre}
-                      onChange={handleInputChangeAluno}
-                      min="1"
-                      max="10"
-                      className="
-                        w-full px-4 py-2
-                        bg-white
-                        border border-[rgba(181,59,24,0.2)]
-                        rounded-lg
-                        text-[#3a2418]
-                        focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
-                      "
-                      placeholder="Ex: 5"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#3a2418] mb-2">
-                      Celular
-                    </label>
-                    <input
-                      type="text"
-                      name="celular"
-                      value={formDataAluno.celular}
-                      onChange={handleInputChangeAluno}
-                      className="
-                        w-full px-4 py-2
-                        bg-white
-                        border border-[rgba(181,59,24,0.2)]
-                        rounded-lg
-                        text-[#3a2418]
-                        focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
-                      "
-                      placeholder="Ex: (11) 98765-4321"
-                    />
-                  </div>
-                </div>
-
-                {/* Botões */}
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleCloseModalAluno}
-                    className="
-                      flex-1
-                      px-6 py-3
-                      font-display text-sm tracking-wide
-                      text-[#6d4b35]
-                      bg-transparent
-                      border-2 border-[rgba(181,59,24,0.3)]
-                      rounded-xl
-                      transition-all duration-300 ease-out
-                      hover:bg-[rgba(181,59,24,0.1)]
-                      focus:outline-none focus:ring-2 focus:ring-[#ff7a2d]/40
-                    "
-                  >
-                    Cancelar
-                  </button>
-                  <DecoButton type="submit" disabled={isSubmitting} className="flex-1">
-                    {isSubmitting ? "Salvando..." : editingAluno ? "Salvar Alterações" : "Adicionar"}
-                  </DecoButton>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal de Criar/Editar Reunião */}
       {isModalReuniaoOpen && (
@@ -1192,6 +873,189 @@ export default function DetalhesOrganizacao() {
                 <button
                   type="button"
                   onClick={handleCloseModalReuniao}
+                  className="
+                    flex-1 px-6 py-3
+                    font-display text-[15px] tracking-wide
+                    text-[#6d4b35]
+                    bg-transparent
+                    border-2 border-[rgba(181,59,24,0.3)]
+                    rounded-xl
+                    hover:bg-[rgba(181,59,24,0.1)]
+                    transition-all
+                  "
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Criar/Editar Aluno */}
+      {isModalAlunoOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+          style={{ backdropFilter: 'blur(8px)' }}
+          onClick={handleCloseModalAluno}
+        >
+          <div
+            className="
+              relative w-full max-w-lg
+              bg-gradient-to-br from-[rgba(255,252,248,0.98)] to-[rgba(255,245,230,0.98)]
+              border border-[rgba(255,190,130,0.5)]
+              rounded-2xl p-8
+              shadow-[0_8px_32px_rgba(0,0,0,0.2)]
+            "
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              boxShadow: "0 8px 32px rgba(0,0,0,0.2), inset 0 0 8px rgba(255,220,180,0.4)",
+            }}
+          >
+            {/* Botão de fechar */}
+            <button
+              onClick={handleCloseModalAluno}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-[#6d4b35] hover:text-[#b53b18] hover:bg-[rgba(181,59,24,0.1)] rounded-lg transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Título do modal */}
+            <h2 className="text-3xl font-display text-[#3a2418] mb-6">
+              {editingAluno ? "Editar Aluno" : "Adicionar Aluno"}
+            </h2>
+
+            {/* Formulário */}
+            <form onSubmit={handleSubmitAluno} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#3a2418] mb-2">
+                  Nome *
+                </label>
+                <input
+                  type="text"
+                  name="nome"
+                  value={formDataAluno.nome}
+                  onChange={handleInputChangeAluno}
+                  required
+                  className="
+                    w-full px-4 py-2
+                    bg-white
+                    border border-[rgba(181,59,24,0.2)]
+                    rounded-lg
+                    text-[#3a2418]
+                    focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
+                  "
+                  placeholder="Ex: João Silva"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#3a2418] mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formDataAluno.email}
+                  onChange={handleInputChangeAluno}
+                  required
+                  className="
+                    w-full px-4 py-2
+                    bg-white
+                    border border-[rgba(181,59,24,0.2)]
+                    rounded-lg
+                    text-[#3a2418]
+                    focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
+                  "
+                  placeholder="Ex: joao@email.com"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#3a2418] mb-2">
+                    CPF *
+                  </label>
+                  <input
+                    type="text"
+                    name="cpf"
+                    value={formDataAluno.cpf}
+                    onChange={handleInputChangeAluno}
+                    required
+                    disabled={!!editingAluno}
+                    className="
+                      w-full px-4 py-2
+                      bg-white
+                      border border-[rgba(181,59,24,0.2)]
+                      rounded-lg
+                      text-[#3a2418]
+                      focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
+                      disabled:bg-gray-100 disabled:cursor-not-allowed
+                    "
+                    placeholder="000.000.000-00"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#3a2418] mb-2">
+                    Semestre
+                  </label>
+                  <input
+                    type="number"
+                    name="semestre"
+                    value={formDataAluno.semestre}
+                    onChange={handleInputChangeAluno}
+                    min="1"
+                    max="10"
+                    className="
+                      w-full px-4 py-2
+                      bg-white
+                      border border-[rgba(181,59,24,0.2)]
+                      rounded-lg
+                      text-[#3a2418]
+                      focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
+                    "
+                    placeholder="Ex: 3"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#3a2418] mb-2">
+                  Celular *
+                </label>
+                <input
+                  type="text"
+                  name="celular"
+                  value={formDataAluno.celular}
+                  onChange={handleInputChangeAluno}
+                  required
+                  className="
+                    w-full px-4 py-2
+                    bg-white
+                    border border-[rgba(181,59,24,0.2)]
+                    rounded-lg
+                    text-[#3a2418]
+                    focus:outline-none focus:ring-2 focus:ring-[#b53b18] focus:border-transparent
+                  "
+                  placeholder="Ex: (11) 99999-9999"
+                />
+              </div>
+
+              {/* Botões */}
+              <div className="flex gap-4 pt-4">
+                <DecoButton
+                  type="submit"
+                  disabled={isSubmittingAluno}
+                  className="flex-1"
+                >
+                  {isSubmittingAluno ? "Salvando..." : editingAluno ? "Salvar Alterações" : "Adicionar Aluno"}
+                </DecoButton>
+                <button
+                  type="button"
+                  onClick={handleCloseModalAluno}
                   className="
                     flex-1 px-6 py-3
                     font-display text-[15px] tracking-wide
